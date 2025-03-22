@@ -1,0 +1,4 @@
+apiVersion: v2
+name: auth-service
+description: A Helm chart for auth-service microservice
+version: 0.1.0

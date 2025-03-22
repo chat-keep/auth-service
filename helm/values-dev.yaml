@@ -1,0 +1,8 @@
+namespace: auth-service-dev
+replicaCount: 1
+deploymentName: auth-service-dev
+image:
+  repository: auth-service
+  tag: dev
+service:
+  port: 8080
