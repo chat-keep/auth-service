@@ -1,6 +1,7 @@
 package com.auth_service.filter;
 
 import com.auth_service.exception.InvalidJwtException;
+import com.auth_service.exception.InvalidSignatureException;
 import com.auth_service.model.constants.ErrorCode;
 import com.auth_service.model.constants.ErrorMessages;
 import com.auth_service.model.response.ApiResponse;
@@ -84,6 +85,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		}
 		catch (IllegalArgumentException | InvalidJwtException e) {
 			sendErrorResponse(response, ErrorMessages.INVALID_JWT_TOKEN);
+		}
+		catch (InvalidSignatureException e) {
+			sendErrorResponse(response, ErrorMessages.INVALID_SIGNATURE);
 		}
 		catch (ExpiredJwtException e) {
 			sendErrorResponse(response, ErrorMessages.EXPIRED_JWT_TOKEN);
