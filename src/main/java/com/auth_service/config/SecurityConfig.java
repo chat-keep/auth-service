@@ -1,6 +1,7 @@
 package com.auth_service.config;
 
 import com.auth_service.filter.JwtRequestFilter;
+import com.auth_service.model.constants.ErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -136,7 +137,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Creates a BCrypt password encoder.
+	 * Creates a BCrypt password encoder.accessDeniedException
 	 * @return a BCryptPasswordEncoder object
 	 */
 	@Bean
@@ -152,7 +153,7 @@ public class SecurityConfig {
 	public AccessDeniedHandler accessDeniedHandler() {
 		return (request, response, accessDeniedException) -> {
 			response.setStatus(HttpStatus.FORBIDDEN.value());
-			response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
+			response.getWriter().write(ErrorMessages.ACCESS_DENIED);
 		};
 	}
 

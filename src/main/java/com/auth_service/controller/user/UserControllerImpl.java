@@ -1,5 +1,6 @@
 package com.auth_service.controller.user;
 
+import com.auth_service.model.constants.SuccessMessages;
 import com.auth_service.model.entity.User;
 import com.auth_service.model.response.ApiResponse;
 import com.auth_service.service.user.UserService;
@@ -27,7 +28,7 @@ public class UserControllerImpl implements UserController {
 	public ResponseEntity<ApiResponse<EntityModel<User>>> findUser(@PathVariable int id) {
 		User user = userService.findById(id);
 		EntityModel<User> userModel = EntityModel.of(user);
-		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse("User retrieved", userModel));
+		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse(SuccessMessages.USER_RETRIEVED, userModel));
 	}
 
 	@PostMapping
@@ -35,25 +36,26 @@ public class UserControllerImpl implements UserController {
 		User savedUser = userService.save(user);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId())
 				.toUri();
-		return ResponseEntity.created(location).body(ApiResponseUtil.createSuccessResponse("User created", null));
+		return ResponseEntity.created(location)
+				.body(ApiResponseUtil.createSuccessResponse(SuccessMessages.USER_CREATED, null));
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> deleteUserById(@PathVariable int id) {
 		userService.deleteById(id);
-		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse("User deleted", null));
+		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse(SuccessMessages.USER_DELETED, null));
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<User>>> getAllUsers() {
 		List<User> users = userService.findAll();
-		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse("Users retrieved", users));
+		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse(SuccessMessages.USERS_RETRIEVED, users));
 	}
 
 	@PutMapping("/{id}/activate")
 	public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable int id) {
 		String message = userService.activateUser(id);
-		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse("User activated", null));
+		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse(SuccessMessages.USER_ACTIVATED, null));
 	}
 
 }

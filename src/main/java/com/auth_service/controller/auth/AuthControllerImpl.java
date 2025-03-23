@@ -2,6 +2,7 @@ package com.auth_service.controller.auth;
 
 import com.auth_service.dto.LoginRequest;
 import com.auth_service.dto.TokenRefreshRequest;
+import com.auth_service.model.constants.SuccessMessages;
 import com.auth_service.model.response.ApiResponse;
 import com.auth_service.service.auth.AuthService;
 import com.auth_service.util.api_response.ApiResponseUtil;
@@ -25,14 +26,14 @@ public class AuthControllerImpl implements AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest loginRequest) {
 		String token = authService.authenticate(loginRequest.getIdentifier(), loginRequest.getPassword());
-		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse("Login successful", token));
+		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse(SuccessMessages.LOGIN_SUCCESSFUL, token));
 	}
 
 	@Override
 	@PostMapping("/refresh")
 	public ResponseEntity<ApiResponse<String>> refreshToken(@RequestBody TokenRefreshRequest request) {
 		String refreshToken = authService.refreshToken(request.getRefreshToken(), request.getUserName());
-		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse("Token refreshed successfully", refreshToken));
+		return ResponseEntity.ok(ApiResponseUtil.createSuccessResponse(SuccessMessages.TOKEN_REFRESHED, refreshToken));
 	}
 
 }

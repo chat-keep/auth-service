@@ -29,6 +29,17 @@ public class AuthServiceImpl implements AuthService {
 		return jwtUtil.generateToken(identifier, user.getRole());
 	}
 
+	public String refreshToken(String refreshToken, String userName) {
+		if (jwtUtil.validateRefreshToken(refreshToken, userName)) {
+			String username = jwtUtil.extractUsername(refreshToken);
+			User user = findUserByIdentifier(username);
+			return jwtUtil.refreshToken(username, user.getRole());
+		}
+		else {
+			throw new InvalidCredentialsException();
+		}
+	}
+
 	/**
 	 * Finds a user by email or username.
 	 * @param identifier the email or username of the user to find
@@ -43,17 +54,6 @@ public class AuthServiceImpl implements AuthService {
 			throw new UserNotFoundException();
 		}
 		return user;
-	}
-
-	public String refreshToken(String refreshToken, String userName) {
-		if (jwtUtil.validateRefreshToken(refreshToken, userName)) {
-			String username = jwtUtil.extractUsername(refreshToken);
-			User user = findUserByIdentifier(username);
-			return jwtUtil.refreshToken(username, user.getRole());
-		}
-		else {
-			throw new InvalidCredentialsException();
-		}
 	}
 
 	/**

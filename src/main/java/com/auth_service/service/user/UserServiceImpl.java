@@ -4,6 +4,7 @@ import com.auth_service.exception.PersonNotFoundException;
 import com.auth_service.exception.UniqueEmailException;
 import com.auth_service.exception.UniqueUserNameException;
 import com.auth_service.exception.UserNotFoundException;
+import com.auth_service.model.constants.ErrorMessages;
 import com.auth_service.model.constants.Role;
 import com.auth_service.model.entity.User;
 import com.auth_service.repository.PersonRepository;
@@ -45,39 +46,6 @@ public class UserServiceImpl implements UserService {
 		validateUser(user);
 
 		return user;
-	}
-
-	/**
-	 * Retrieves the current logged user.
-	 * @return the current user
-	 */
-	private User getCurrentUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		return userRepository.findByUserName(userDetails.getUsername());
-	}
-
-	/**
-	 * Validates if the current user has access to the user with the given ID.
-	 * @param currentUser the current user
-	 * @param userId the ID of the user to validate access
-	 */
-	private void validateAccess(User currentUser, int userId) {
-		boolean isAdmin = currentUser.getRole() == Role.ADMIN;
-
-		if (!isAdmin && currentUser.getId() != userId) {
-			throw new AccessDeniedException("Access is denied");
-		}
-	}
-
-	/**
-	 * Validates if the user has a person associated.
-	 * @param user the user to validate
-	 */
-	private void validateUser(User user) {
-		if (user.getPerson() == null) {
-			throw new PersonNotFoundException();
-		}
 	}
 
 	@Transactional
@@ -150,6 +118,22 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
+	 * Loads a user by username.
+	 * @param userName the username of the user to load
+	 * @return the user details
+	 * @throws UsernameNotFoundException if the username is not found
+	 */
+	@Override
+	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+		User user = userRepository.findByUserName(userName);
+		if (user == null) {
+			throw new UsernameNotFoundException(ErrorMessages.USERNAME_NOT_FOUND);
+		}
+		return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(),
+				new ArrayList<>());
+	}
+
+	/**
 	 * Checks if an email already exists.
 	 * @param email the email to check
 	 * @return true if the email exists, false otherwise
@@ -167,14 +151,37 @@ public class UserServiceImpl implements UserService {
 		return userRepository.existsByUserName(userName);
 	}
 
-	@Override
-	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-		User user = userRepository.findByUserName(userName);
-		if (user == null) {
-			throw new UsernameNotFoundException("User not found with userName: " + userName);
+	/**
+	 * Retrieves the current logged user.
+	 * @return the current user
+	 */
+	private User getCurrentUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		return userRepository.findByUserName(userDetails.getUsername());
+	}
+
+	/**
+	 * Validates if the current user has access to the user with the given ID.
+	 * @param currentUser the current user
+	 * @param userId the ID of the user to validate access
+	 */
+	private void validateAccess(User currentUser, int userId) {
+		boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+
+		if (!isAdmin && currentUser.getId() != userId) {
+			throw new AccessDeniedException("Access is denied");
 		}
-		return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(),
-				new ArrayList<>());
+	}
+
+	/**
+	 * Validates if the user has a person associated.
+	 * @param user the user to validate
+	 */
+	private void validateUser(User user) {
+		if (user.getPerson() == null) {
+			throw new PersonNotFoundException();
+		}
 	}
 
 }

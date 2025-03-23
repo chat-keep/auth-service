@@ -1,13 +1,17 @@
 package com.auth_service.filter;
 
+import com.auth_service.exception.InvalidJwtException;
+import com.auth_service.model.constants.ErrorCode;
+import com.auth_service.model.constants.ErrorMessages;
+import com.auth_service.model.response.ApiResponse;
+import com.auth_service.util.api_response.ApiResponseUtil;
 import com.auth_service.util.jwt.JwtUtilImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,8 +28,6 @@ import java.util.Collections;
  */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-
-	private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
 
 	private final JwtUtilImpl jwtUtil;
 
@@ -48,31 +50,60 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 		String jwtToken = extractJwtFromRequest(request);
-		String username = null;
-		String role = null;
 
 		if (jwtToken != null) {
-			try {
-				username = jwtUtil.extractUsername(jwtToken);
-				role = jwtUtil.extractRole(jwtToken).name();
-				logger.info("Extracted Username: {}", username);
-				logger.info("Extracted Role: {}", role);
-			}
-			catch (IllegalArgumentException e) {
-				logger.error("Unable to get JWT Token", e);
-			}
-			catch (ExpiredJwtException e) {
-				logger.warn("JWT Token has expired", e);
+			if (!processToken(jwtToken, request, response)) {
+				return;
 			}
 		}
 
-		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-			if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
-				setAuthenticationForUser(request, userDetails, role);
-			}
-		}
 		chain.doFilter(request, response);
+	}
+
+	/**
+	 * Processes the JWT token.
+	 * @param jwtToken the JWT token
+	 * @param request the HTTP request
+	 * @param response the HTTP response
+	 * @return true if the token is valid, false otherwise
+	 * @throws IOException if an I/O exception occurs
+	 */
+	private boolean processToken(String jwtToken, HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+		try {
+			String username = jwtUtil.extractUsername(jwtToken);
+			String role = jwtUtil.extractRole(jwtToken).name();
+
+			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+				if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
+					setAuthenticationForUser(request, userDetails, role);
+				}
+			}
+			return true;
+		}
+		catch (IllegalArgumentException | InvalidJwtException e) {
+			sendErrorResponse(response, ErrorMessages.INVALID_JWT_TOKEN);
+		}
+		catch (ExpiredJwtException e) {
+			sendErrorResponse(response, ErrorMessages.EXPIRED_JWT_TOKEN);
+		}
+		return false;
+	}
+
+	/**
+	 * Sends an error response to the client.
+	 * @param response the HTTP response
+	 * @param message the error message
+	 * @throws IOException if an I/O exception occurs
+	 */
+	private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		response.setContentType("application/json;charset=UTF-8");
+		ApiResponse<Void> apiResponse = ApiResponseUtil.createErrorResponse(message, null,
+				ErrorCode.ERR_INVALID_JWT.getCode());
+		ObjectMapper mapper = new ObjectMapper();
+		response.getWriter().write(mapper.writeValueAsString(apiResponse));
 	}
 
 	/**
