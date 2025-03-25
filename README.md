@@ -1,4 +1,4 @@
-# auth-api
+# auth-servive
 
 ## Description
 This is a Spring Boot application for managing user data and authentication.
@@ -6,7 +6,7 @@ This is a Spring Boot application for managing user data and authentication.
 ## Project Structure
 
 ```
-auth-api/
+auth-service/
 ├── src/
 │   ├── main/
 │   │   ├── java/
