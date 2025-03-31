@@ -1,8 +1,55 @@
-namespace: auth-service-dev
-replicaCount: 1
-deploymentName: auth-service-dev
+namespace: <namespace>
+deploymentName: <deployment-name>
+replicaCount: <replica-count>
 image:
-  repository: auth-service
-  tag: dev
+  repository: <repository>
+  tag: <tag>
 service:
-  port: 8080
+  port: <service-port>
+configMapName: <config-map-name>
+springServerPort: <spring-server-port>
+spring:
+  port: <spring-server-port>
+  application:
+    name: <application-name>
+  profiles:
+    active: <active-profile>
+  datasource:
+    url: <jdbc-url>
+    username: <db-username>
+    password: <db-password>
+    driver:
+      className: <driver-class-name>
+  aws:
+    accountId: <aws-account-id>
+    region: <aws-region>
+    role:
+      arn: <aws-role-arn>
+    secret:
+      arn: <aws-secret-arn>
+  jpa:
+    hibernate:
+      ddlAuto: <ddl-auto>
+    showSql: <show-sql>
+    properties:
+      hibernate:
+        dialect: <hibernate-dialect>
+    databasePlatform: <database-platform>
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: <expose-endpoints>
+  logging:
+    level:
+      com:
+        auth:
+          service: <logging-level>
+  doc:
+    api:
+      docs:
+        path: <api-docs-path>
+    swagger:
+      uiPath: <swagger-ui-path>
+
+

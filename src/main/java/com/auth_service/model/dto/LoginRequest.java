@@ -1,4 +1,4 @@
-package com.auth_service.dto;
+package com.auth_service.model.dto;
 
 import jakarta.validation.constraints.NotNull;
 

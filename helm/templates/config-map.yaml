@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+data:
+  SPRING_SERVER_PORT: "{{ .Values.spring.port }}"
+  SPRING_APPLICATION_NAME: "{{ .Values.spring.application.name }}"
+  SPRING_PROFILES_ACTIVE: "{{ .Values.spring.profiles.active }}"
+  SPRING_DATASOURCE_URL: "{{ .Values.spring.datasource.url }}"
+  SPRING_DATASOURCE_USERNAME: "{{ .Values.spring.datasource.username }}"
+  SPRING_DATASOURCE_PASSWORD: "{{ .Values.spring.datasource.password }}"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "{{ .Values.spring.datasource.driver.className }}"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "{{ .Values.spring.jpa.hibernate.ddlAuto }}"
+  SPRING_JPA_SHOW_SQL: "{{ .Values.spring.jpa.showSql }}"
+  SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: "{{ .Values.spring.jpa.properties.hibernate.dialect }}"
+  SPRING_JPA_DATABASE_PLATFORM: "{{ .Values.spring.jpa.databasePlatform }}"
+  SPRING_LOGGING_LEVEL_COM_AUTH_SERVICE: "{{ .Values.spring.logging.level.com.auth.service }}"
+  SPRING_DOC_API_DOCS_PATH: "{{ .Values.spring.doc.api.docs.path }}"
+  SPRING_DOC_SWAGGER_UI_PATH: "{{ .Values.spring.doc.swagger.uiPath }}"
+  SPRING_AWS_REGION: "{{ .Values.spring.aws.region }}"
+  SPRING_AWS_SECRET_ARN: "{{ .Values.spring.aws.secret.arn }}"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "{{ .Values.spring.management.endpoints.web.exposure.include }}"

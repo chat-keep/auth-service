@@ -1,7 +1,7 @@
 package com.auth_service.controller.auth;
 
-import com.auth_service.dto.LoginRequest;
-import com.auth_service.dto.TokenRefreshRequest;
+import com.auth_service.model.dto.LoginRequest;
+import com.auth_service.model.dto.TokenRefreshRequest;
 import com.auth_service.model.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;

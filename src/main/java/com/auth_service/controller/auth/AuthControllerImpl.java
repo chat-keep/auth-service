@@ -1,7 +1,7 @@
 package com.auth_service.controller.auth;
 
-import com.auth_service.dto.LoginRequest;
-import com.auth_service.dto.TokenRefreshRequest;
+import com.auth_service.model.dto.LoginRequest;
+import com.auth_service.model.dto.TokenRefreshRequest;
 import com.auth_service.model.constants.SuccessMessages;
 import com.auth_service.model.response.ApiResponse;
 import com.auth_service.service.auth.AuthService;

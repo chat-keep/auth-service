@@ -28,8 +28,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+	/**
+	 * JwtRequestFilter object. Used for filtering JWT requests.
+	 */
 	private final JwtRequestFilter jwtRequestFilter;
 
+	/**
+	 * Constructor for SecurityConfig.
+	 * @param jwtRequestFilter the JwtRequestFilter object
+	 */
 	@Autowired
 	public SecurityConfig(@Lazy JwtRequestFilter jwtRequestFilter) {
 		this.jwtRequestFilter = jwtRequestFilter;

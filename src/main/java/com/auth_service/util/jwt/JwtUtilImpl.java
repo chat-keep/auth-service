@@ -1,10 +1,11 @@
 package com.auth_service.util.jwt;
 
+import com.auth_service.config.AwsSecretPropsConfig;
 import com.auth_service.exception.InvalidSignatureException;
 import com.auth_service.exception.InvalidJwtException;
 import com.auth_service.model.constants.Role;
 import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -15,14 +16,30 @@ import java.util.function.Function;
 @Component
 public class JwtUtilImpl implements JwtUtil {
 
-	@Value("${jwt.secret}")
-	private String SECRET_KEY;
+	/**
+	 * The secret key used for signing the JWT tokens.
+	 */
+	private final String JWT_SECRET;
 
-	// 15 minutes
+	/**
+	 * The validity period of the access token in milliseconds.
+	 */
 	private static final long ACCESS_TOKEN_VALIDITY = 15 * 60 * 1000;
 
-	// 7 days
+	/**
+	 * The validity period of the refresh token in milliseconds.
+	 */
 	private static final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000;
+
+	/**
+	 * Constructor for JwtUtilImpl. Initializes the secret key from the AWS secret
+	 * properties.
+	 * @param awsSecretPropsConfig the AWS secret properties configuration
+	 */
+	@Autowired
+	public JwtUtilImpl(AwsSecretPropsConfig awsSecretPropsConfig) {
+		this.JWT_SECRET = awsSecretPropsConfig.getJwtSecret();
+	}
 
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
@@ -70,7 +87,7 @@ public class JwtUtilImpl implements JwtUtil {
 	 */
 	private Claims extractAllClaims(String token) {
 		try {
-			return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+			return Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token).getBody();
 		}
 		catch (SignatureException e) {
 			throw new InvalidSignatureException();
@@ -103,7 +120,7 @@ public class JwtUtilImpl implements JwtUtil {
 
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + validity))
-				.signWith(SignatureAlgorithm.HS512, SECRET_KEY).compact();
+				.signWith(SignatureAlgorithm.HS512, JWT_SECRET).compact();
 	}
 
 }

@@ -20,4 +20,4 @@ spec:
               - containerPort: {{ .Values.service.port }}
           envFrom:
             - configMapRef:
-                name: {{ .Values.deploymentName }}-config
+                name: {{ .Values.configMapName }}
