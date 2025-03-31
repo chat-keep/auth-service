@@ -4,6 +4,9 @@
 # Environment
 .env
 
+# Logs
+output_dir/
+
 # Package Files #
 *.jar
 *.war
