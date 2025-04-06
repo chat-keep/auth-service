@@ -4,6 +4,7 @@ import com.auth_service.exception.InvalidSignatureException;
 import com.auth_service.exception.InvalidJwtException;
 import com.auth_service.model.constants.Role;
 import io.jsonwebtoken.*;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@DependsOn("awsSecretsManagerConfig")
 public class JwtUtilImpl implements JwtUtil {
 
 	/**

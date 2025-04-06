@@ -55,7 +55,6 @@ public class AwsSecretsManagerConfig {
 	 * @return the GetSecretValueRequest
 	 */
 	private GetSecretValueRequest createSecretValueRequest() {
-		System.out.println("Fetching secret value from AWS Secrets Manager. Secret Arn:" + secretArn);
 		return GetSecretValueRequest.builder().secretId(secretArn).build();
 	}
 
