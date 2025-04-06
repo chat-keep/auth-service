@@ -35,6 +35,19 @@ auth-service/
 - `GET /users`: Retrieve all users.
 - `PUT /users/{id}/activate`: Activate a user by ID.
 
+## Custom Error Codes
+- GEN_001: Internal server error.
+- USR_001: User not found.
+- USR_002: Person not found.
+- USR_003: Email already exists.
+- USR_004: Username already exists.
+- USR_005: Username not found.
+- AUTH_001: Access denied.
+- AUTH_002: Invalid credentials.
+- AUTH_003: Invalid signature.
+- AUTH_005: Expired JWT.
+- AUTH_006: Invalid JWT.
+
 ## Requirements
 - Java 21
 - Maven 3.6+
@@ -63,6 +76,21 @@ auth-service/
 1. Run the Docker Compose:
    ```sh
    docker-compose up
+   ```
+
+### Deploying on kind
+
+To deploy the application on a local Kubernetes cluster using kind, you need to fill in the values in the helm/values-dev.yaml file.
+
+Requirements:
+- kind
+- kubectl
+- Helm
+- AWS CLI
+
+1. Run the script to deploy the application on kind:
+   ```sh
+   ./deploy_local.sh
    ```
 
 ## Links
