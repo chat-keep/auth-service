@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: auth-service-config
+  name: {{ .Values.configMapName }}
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
 data:
@@ -19,6 +19,11 @@ data:
   SPRING_LOGGING_LEVEL_COM_AUTH_SERVICE: "{{ .Values.spring.logging.level.com.auth.service }}"
   SPRING_DOC_API_DOCS_PATH: "{{ .Values.spring.doc.api.docs.path }}"
   SPRING_DOC_SWAGGER_UI_PATH: "{{ .Values.spring.doc.swagger.uiPath }}"
-  SPRING_AWS_REGION: "{{ .Values.spring.aws.region }}"
-  SPRING_AWS_SECRET_ARN: "{{ .Values.spring.aws.secret.arn }}"
+  SPRING_AWS_SECRET_ARN: "{{ tpl .Values.spring.aws.secret.arn . }}"
+  AWS_REGION: "{{ .Values.spring.aws.region }}"
+  AWS_ROLE_ARN: "{{ tpl .Values.spring.aws.role.arn . }}"
+  AWS_SESSION_TOKEN: "{{ .Values.spring.aws.sessionToken }}"
+  AWS_WEB_IDENTITY_TOKEN_FILE: "{{ .Values.spring.aws.webIdentityTokenFile }}"
+  AWS_ACCESS_KEY_ID: "{{ .Values.spring.aws.accessKeyId }}"
+  AWS_SECRET_ACCESS_KEY: "{{ .Values.spring.aws.secretAccessKey }}"
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "{{ .Values.spring.management.endpoints.web.exposure.include }}"

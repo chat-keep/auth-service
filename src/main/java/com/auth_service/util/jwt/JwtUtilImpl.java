@@ -1,11 +1,9 @@
 package com.auth_service.util.jwt;
 
-import com.auth_service.config.AwsSecretPropsConfig;
 import com.auth_service.exception.InvalidSignatureException;
 import com.auth_service.exception.InvalidJwtException;
 import com.auth_service.model.constants.Role;
 import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -17,9 +15,10 @@ import java.util.function.Function;
 public class JwtUtilImpl implements JwtUtil {
 
 	/**
-	 * The secret key used for signing the JWT tokens.
+	 * The secret key used for signing the JWT tokens. It is fetched from the system
+	 * properties.
 	 */
-	private final String JWT_SECRET;
+	private final String JWT_SECRET = System.getProperty("JWT_SECRET");
 
 	/**
 	 * The validity period of the access token in milliseconds.
@@ -30,16 +29,6 @@ public class JwtUtilImpl implements JwtUtil {
 	 * The validity period of the refresh token in milliseconds.
 	 */
 	private static final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000;
-
-	/**
-	 * Constructor for JwtUtilImpl. Initializes the secret key from the AWS secret
-	 * properties.
-	 * @param awsSecretPropsConfig the AWS secret properties configuration
-	 */
-	@Autowired
-	public JwtUtilImpl(AwsSecretPropsConfig awsSecretPropsConfig) {
-		this.JWT_SECRET = awsSecretPropsConfig.getJwtSecret();
-	}
 
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);

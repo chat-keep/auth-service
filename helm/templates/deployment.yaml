@@ -13,6 +13,7 @@ spec:
       labels:
         app: {{ .Values.deploymentName }}
     spec:
+      serviceAccountName: auth-service-sa
       containers:
         - name: {{ .Values.deploymentName }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}

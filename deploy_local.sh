@@ -10,6 +10,51 @@ AUTH_SERVICE_DOCKER_IMAGE="auth-service-dev:$AUTH_SERVICE_DOCKER_IMAGE_TAG"
 # Load utility functions
 source ./scripts/local_util.sh
 
+# Load aws secrets environment variables
+assume_role() {
+  local role_arn=$AWS_ROLE_ARN
+  local session_name="auth-service-dev-session"
+
+  echo_header "Assuming role $role_arn..."
+
+  local assume_role_output
+  assume_role_output=$(aws sts assume-role --role-arn "$role_arn" --role-session-name "$session_name")
+
+  if [ $? -ne 0 ]; then
+    echo "Failed to assume role $role_arn"
+    return 1
+  fi
+
+  set_aws_credentials "$assume_role_output"
+
+  echo_footer "Assumed role $role_arn successfully."
+}
+
+# Set AWS credentials from the assumed role
+set_aws_credentials() {
+  local assume_role_output=$1
+
+  local access_key_id
+  local secret_access_key
+
+  echo_header "Setting AWS credentials..."
+
+  access_key_id=$(echo "$assume_role_output" | jq -r '.Credentials.AccessKeyId')
+  secret_access_key=$(echo "$assume_role_output" | jq -r '.Credentials.SecretAccessKey')
+  session_token=$(echo "$assume_role_output" | jq -r '.Credentials.SessionToken')
+
+  if [ -z "$access_key_id" ] || [ -z "$secret_access_key" ] || [ -z "$session_token" ]; then
+    echo "Invalid credentials received"
+    return 1
+  fi
+
+  export AWS_ACCESS_KEY_ID="$access_key_id"
+  export AWS_SECRET_ACCESS_KEY="$secret_access_key"
+  export AWS_SESSION_TOKEN="$session_token"
+
+  echo_footer "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY have been set."
+}
+
 # Create kind cluster
 create_kind_cluster() {
   echo_header "Creating kind cluster..."
@@ -39,10 +84,16 @@ create_namespace() {
 
 # Apply Kubernetes configuration using Helm
 apply_k8s_configuration() {
-  echo_header "Applying Kubernetes configuration using Helm..."
   local deploymentName
+
+  echo_header "Applying Kubernetes configuration using Helm..."
+
   deploymentName="$(yq r helm/values-dev.yaml 'deploymentName')"
-  helm upgrade --install "$deploymentName" helm -f helm/values-dev.yaml --namespace "$AUTH_SERVICE_NAMESPACE"
+  helm upgrade --install "$deploymentName" helm -f helm/values-dev.yaml --namespace "$AUTH_SERVICE_NAMESPACE" \
+    --set spring.aws.accessKeyId="$AWS_ACCESS_KEY_ID" \
+    --set spring.aws.secretAccessKey="$AWS_SECRET_ACCESS_KEY" \
+    --set spring.aws.sessionToken="$AWS_SESSION_TOKEN"
+
   echo_footer "Kubernetes configuration applied successfully."
 }
 
@@ -73,28 +124,10 @@ get_service_url() {
   echo_footer "Service is available at http://$SERVICE_URL:8080"
 }
 
-# Pull PostgreSQL image
-pull_postgres_image() {
-  echo_header "Pulling PostgreSQL image..."
-  local db_name="notes_ai_bot_db"
-
-  docker pull postgres:latest
-  docker run -d \
-      --name postgres \
-      -e POSTGRES_PASSWORD=admin \
-      -e POSTGRES_USER=admin \
-      -e POSTGRES_DB=$db_name \
-      -p 5434:5432 \
-      -v postgres_data:/var/lib/postgresql/data \
-      postgres:latest
-
-  echo_footer "PostgreSQL image pulled and container started successfully."
-}
-
 # Main script execution
 main() {
-#  pull_postgres_image
   echo_app_title
+  assume_role
   create_kind_cluster
   build_docker_image
   load_docker_image

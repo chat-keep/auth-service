@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
@@ -20,56 +22,111 @@ public class AwsSecretsManagerConfig {
 
 	private final SecretsManagerClient secretsManagerClient;
 
-	private final AwsSecretPropsConfig awsSecretPropsConfig;
-
 	@Value("${aws.secretsmanager.secretArn}")
 	private String secretArn;
 
-	public AwsSecretsManagerConfig(SecretsManagerClient secretsManagerClient,
-			AwsSecretPropsConfig awsSecretPropsConfig) {
-		this.secretsManagerClient = secretsManagerClient;
-		this.awsSecretPropsConfig = awsSecretPropsConfig;
+	public AwsSecretsManagerConfig() {
+		this.secretsManagerClient = buildSecretsManagerClient();
 	}
 
 	/**
-	 * Initializes the AWS secret properties by fetching them from AWS Secrets Manager.
+	 * Initializes the configuration by fetching the secret properties from AWS Secrets
+	 * Manager.
+	 * @throws JsonProcessingException if an error occurs while processing JSON
 	 */
 	@PostConstruct
 	public void init() throws JsonProcessingException {
-		String secretString = getSecretString();
-		awsSecretPropsConfig.setJwtSecret(getSecretValue(secretString, "authServiceJwtSecret"));
+		String secretString = fetchSecretString();
+		setSecretProperty(secretString, "authServiceJwtSecret", "JWT_SECRET");
 	}
 
 	/**
-	 * Returns the JWT secret from the AWS secret properties.
-	 * @return the JWT secret
+	 * Fetches the secret string from AWS Secrets Manager.
+	 * @return the secret string
 	 */
-	private String getSecretString() throws JsonProcessingException {
-		GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder().secretId(secretArn).build();
-		GetSecretValueResponse getSecretValueResponse = secretsManagerClient.getSecretValue(getSecretValueRequest);
-		return getSecretValueResponse.secretString();
+	private String fetchSecretString() {
+		GetSecretValueRequest request = createSecretValueRequest();
+		GetSecretValueResponse response = secretsManagerClient.getSecretValue(request);
+		return response.secretString();
 	}
 
 	/**
-	 * Returns the value of the specified property from the secret string.
+	 * Creates a request to fetch the secret value from AWS Secrets Manager.
+	 * @return the GetSecretValueRequest
+	 */
+	private GetSecretValueRequest createSecretValueRequest() {
+		System.out.println("Fetching secret value from AWS Secrets Manager. Secret Arn:" + secretArn);
+		return GetSecretValueRequest.builder().secretId(secretArn).build();
+	}
+
+	/**
+	 * Sets the secret property in the system properties.
 	 * @param secretString the secret string
-	 * @param propertyName the name of the property
-	 * @return the value of the specified property
-	 * @throws JsonProcessingException if an error occurs while processing the JSON
+	 * @param propertyName the property name to extract from the secret string
+	 * @param systemPropertyName the system property name to set
+	 * @throws JsonProcessingException if an error occurs while processing JSON
 	 */
-	private String getSecretValue(String secretString, String propertyName) throws JsonProcessingException {
+	private void setSecretProperty(String secretString, String propertyName, String systemPropertyName)
+			throws JsonProcessingException {
+		String secretValue = extractSecretValue(secretString, propertyName);
+		System.setProperty(systemPropertyName, secretValue);
+	}
+
+	/**
+	 * Extracts the secret value from the secret string.
+	 * @param secretString the secret string
+	 * @param propertyName the property name to extract
+	 * @return the extracted secret value
+	 * @throws JsonProcessingException if an error occurs while processing JSON
+	 */
+	private String extractSecretValue(String secretString, String propertyName) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode secretJson = objectMapper.readTree(secretString);
 		return secretJson.get(propertyName).asText();
 	}
 
 	/**
-	 * Defines a bean for SecretsManagerClient.
-	 * @return the SecretsManagerClient bean
+	 * Builds the SecretsManagerClient based on the environment credentials.
+	 * @return the SecretsManagerClient
 	 */
-	@Bean
-	public SecretsManagerClient createSecretsManagerClient() {
-		return SecretsManagerClient.builder().region(Region.US_EAST_1).build();
+	private SecretsManagerClient buildSecretsManagerClient() {
+		if (areEnvironmentCredentialsAvailable()) {
+			return createClientWithStaticCredentials();
+		}
+
+		return createClientWithWebIdentityCredentials();
+	}
+
+	/**
+	 * Checks if the environment credentials are available.
+	 * @return true if environment credentials are available, false otherwise
+	 */
+	private boolean areEnvironmentCredentialsAvailable() {
+		String accessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
+		String secretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY");
+		String sessionToken = System.getenv("AWS_SESSION_TOKEN");
+
+		return accessKeyId != null && secretAccessKey != null && sessionToken != null;
+	}
+
+	/**
+	 * Creates a SecretsManagerClient with static credentials.
+	 * @return the SecretsManagerClient
+	 */
+	private SecretsManagerClient createClientWithStaticCredentials() {
+		AwsSessionCredentials awsCreds = AwsSessionCredentials.create(System.getenv("AWS_ACCESS_KEY_ID"),
+				System.getenv("AWS_SECRET_ACCESS_KEY"), System.getenv("AWS_SESSION_TOKEN"));
+		return SecretsManagerClient.builder().region(Region.of(System.getenv("AWS_REGION")))
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds)).build();
+	}
+
+	/**
+	 * Creates a SecretsManagerClient with web identity credentials.
+	 * @return the SecretsManagerClient
+	 */
+	private SecretsManagerClient createClientWithWebIdentityCredentials() {
+		return SecretsManagerClient.builder().region(Region.of(System.getenv("AWS_REGION")))
+				.credentialsProvider(WebIdentityTokenFileCredentialsProvider.create()).build();
 	}
 
 }

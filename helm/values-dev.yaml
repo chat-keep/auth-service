@@ -1,4 +1,5 @@
 namespace: <namespace>
+environment: <environment>
 deploymentName: <deployment-name>
 replicaCount: <replica-count>
 image:
@@ -15,9 +16,9 @@ spring:
   profiles:
     active: <active-profile>
   datasource:
-    url: <jdbc-url>
-    username: <db-username>
-    password: <db-password>
+    url: <url>
+    username: <username>
+    password: <password>
     driver:
       className: <driver-class-name>
   aws:
@@ -27,6 +28,8 @@ spring:
       arn: <aws-role-arn>
     secret:
       arn: <aws-secret-arn>
+    webIdentityTokenFile: <aws-web-identity-token-file>
+
   jpa:
     hibernate:
       ddlAuto: <ddl-auto>
@@ -39,7 +42,7 @@ spring:
     endpoints:
       web:
         exposure:
-          include: <expose-endpoints>
+          include: <exposure-include>
   logging:
     level:
       com:
