@@ -4,7 +4,7 @@ import com.auth_service.exception.InvalidCredentialsException;
 import com.auth_service.exception.UserNotFoundException;
 import com.auth_service.model.entity.User;
 import com.auth_service.repository.UserRepository;
-import com.auth_service.util.jwt.JwtUtilImpl;
+import com.auth_service.common.util.jwt.JwtUtilImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 

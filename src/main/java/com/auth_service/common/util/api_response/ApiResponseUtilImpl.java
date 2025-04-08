@@ -1,4 +1,4 @@
-package com.auth_service.util.api_response;
+package com.auth_service.common.util.api_response;
 
 import com.auth_service.model.response.ApiResponse;
 import org.springframework.stereotype.Component;
