@@ -3,7 +3,7 @@ package com.auth_service.exception;
 import com.auth_service.model.constants.ErrorCode;
 import com.auth_service.model.constants.ErrorMessages;
 import com.auth_service.model.response.ApiResponse;
-import com.auth_service.util.api_response.ApiResponseUtil;
+import com.auth_service.common.util.api_response.ApiResponseUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

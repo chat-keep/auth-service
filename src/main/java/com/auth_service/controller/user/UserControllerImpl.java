@@ -4,7 +4,7 @@ import com.auth_service.model.constants.SuccessMessages;
 import com.auth_service.model.entity.User;
 import com.auth_service.model.response.ApiResponse;
 import com.auth_service.service.user.UserService;
-import com.auth_service.util.api_response.ApiResponseUtil;
+import com.auth_service.common.util.api_response.ApiResponseUtil;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;

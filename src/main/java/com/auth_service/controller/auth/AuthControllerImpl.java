@@ -5,7 +5,7 @@ import com.auth_service.model.dto.TokenRefreshRequest;
 import com.auth_service.model.constants.SuccessMessages;
 import com.auth_service.model.response.ApiResponse;
 import com.auth_service.service.auth.AuthService;
-import com.auth_service.util.api_response.ApiResponseUtil;
+import com.auth_service.common.util.api_response.ApiResponseUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

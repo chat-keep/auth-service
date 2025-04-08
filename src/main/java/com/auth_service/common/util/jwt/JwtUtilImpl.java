@@ -1,4 +1,4 @@
-package com.auth_service.util.jwt;
+package com.auth_service.common.util.jwt;
 
 import com.auth_service.exception.InvalidSignatureException;
 import com.auth_service.exception.InvalidJwtException;
