@@ -27,4 +27,8 @@ public class ErrorMessages {
 
 	public static final String USERNAME_NOT_FOUND = "Failed with error: Username not found.";
 
+	public static final String INVALID_AWS_SECRET_VALUE = "Failed with error: Invalid AWS secret value. Secret value is empty or not a number.";
+
+	public static final String INVALID_AWS_SECRET_STRING = "Failed with error: Invalid AWS secret string.";
+
 }
