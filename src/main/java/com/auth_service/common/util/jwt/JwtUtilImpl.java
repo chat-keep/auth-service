@@ -1,5 +1,6 @@
 package com.auth_service.common.util.jwt;
 
+import com.auth_service.exception.InvalidAwsSecretValueException;
 import com.auth_service.exception.InvalidSignatureException;
 import com.auth_service.exception.InvalidJwtException;
 import com.auth_service.model.constants.Role;
@@ -25,12 +26,12 @@ public class JwtUtilImpl implements JwtUtil {
 	/**
 	 * The validity period of the access token in milliseconds.
 	 */
-	private static final long ACCESS_TOKEN_VALIDITY = 15 * 60 * 1000;
+	private final String ACCESS_TOKEN_VALIDITY = System.getProperty("AUTH_SERVICE_ACCESS_TOKEN_VALIDITY");
 
 	/**
 	 * The validity period of the refresh token in milliseconds.
 	 */
-	private static final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000;
+	private final String REFRESH_TOKEN_VALIDITY = System.getProperty("AUTH_SERVICE_REFRESH_TOKEN_VALIDITY");
 
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
@@ -48,13 +49,13 @@ public class JwtUtilImpl implements JwtUtil {
 	public String generateToken(String username, Role role) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("role", role.name());
-		return createToken(claims, username, ACCESS_TOKEN_VALIDITY);
+		return createToken(claims, username, getAccessTokenValidity());
 	}
 
 	public String refreshToken(String username, Role role) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("role", role.name());
-		return createToken(claims, username, REFRESH_TOKEN_VALIDITY);
+		return createToken(claims, username, getRefreshTokenValidity());
 	}
 
 	public boolean validateToken(String token, String username) {
@@ -72,7 +73,33 @@ public class JwtUtilImpl implements JwtUtil {
 	}
 
 	/**
-	 * Extracts all claims from the JWT token.
+	 * @description Gets the access token validity period from the system properties.
+	 * @return the access token validity period in milliseconds
+	 */
+	private long getAccessTokenValidity() {
+		try {
+			return Long.parseLong(ACCESS_TOKEN_VALIDITY);
+		}
+		catch (NumberFormatException e) {
+			throw new InvalidAwsSecretValueException();
+		}
+	}
+
+	/**
+	 * @description Gets the refresh token validity period from the system properties.
+	 * @return the refresh token validity period in milliseconds
+	 */
+	private long getRefreshTokenValidity() {
+		try {
+			return Long.parseLong(REFRESH_TOKEN_VALIDITY);
+		}
+		catch (NumberFormatException e) {
+			throw new InvalidAwsSecretValueException();
+		}
+	}
+
+	/**
+	 * @description Extracts all claims from the JWT token.
 	 * @param token the JWT token
 	 * @return the claims extracted from the token
 	 */
@@ -89,7 +116,7 @@ public class JwtUtilImpl implements JwtUtil {
 	}
 
 	/**
-	 * Checks if the token is expired.
+	 * @description Checks if the token is expired.
 	 * @param token the JWT token
 	 * @return true if the token is expired, false otherwise
 	 */
@@ -98,7 +125,7 @@ public class JwtUtilImpl implements JwtUtil {
 	}
 
 	/**
-	 * Creates a new JWT token.
+	 * @description Creates a new JWT token.
 	 * @param claims the claims to include in the token
 	 * @param subject the subject of the token
 	 * @param validity the validity period of the token
@@ -106,8 +133,10 @@ public class JwtUtilImpl implements JwtUtil {
 	 */
 	private String createToken(Map<String, Object> claims, String subject, long validity) {
 		if (validity <= 0) {
-			validity = ACCESS_TOKEN_VALIDITY;
+			validity = getAccessTokenValidity();
 		}
+
+		validity = validity * 1000;
 
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + validity))

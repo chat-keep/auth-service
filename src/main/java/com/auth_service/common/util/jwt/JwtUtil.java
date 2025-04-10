@@ -9,21 +9,22 @@ import java.util.function.Function;
 public interface JwtUtil {
 
 	/**
-	 * Extracts the username from the JWT token.
+	 * @description Extracts the username from the JWT token.
 	 * @param token the JWT token
 	 * @return the username extracted from the token
 	 */
 	String extractUsername(String token);
 
 	/**
-	 * Extracts the expiration date from the JWT token.
+	 * @description Extracts the expiration date from the JWT token.
 	 * @param token the JWT token
 	 * @return the expiration date extracted from the token
 	 */
 	Date extractExpiration(String token);
 
 	/**
-	 * Extracts a specific claim from the JWT token using a claims resolver function.
+	 * @description Extracts a specific claim from the JWT token using a claims resolver
+	 * function.
 	 * @param <T> the type of the claim
 	 * @param token the JWT token
 	 * @param claimsResolver the function to resolve the claim
@@ -32,7 +33,7 @@ public interface JwtUtil {
 	<T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
 	/**
-	 * Generates a new JWT token for the given username and role.
+	 * @description Generates a new JWT token for the given username and role.
 	 * @param username the username for which the token is generated
 	 * @param role the role of the user
 	 * @return the generated JWT token
@@ -40,7 +41,7 @@ public interface JwtUtil {
 	String generateToken(String username, Role role);
 
 	/**
-	 * Generates a new refresh token for the given username and role.
+	 * @description Generates a new refresh token for the given username and role.
 	 * @param username the username for which the refresh token is generated
 	 * @param role the role of the user
 	 * @return the generated refresh token
@@ -48,7 +49,7 @@ public interface JwtUtil {
 	String refreshToken(String username, Role role);
 
 	/**
-	 * Validates the JWT token against the given username.
+	 * @description Validates the JWT token against the given username.
 	 * @param token the JWT token
 	 * @param username the username to validate against
 	 * @return true if the token is valid, false otherwise
@@ -56,7 +57,7 @@ public interface JwtUtil {
 	boolean validateToken(String token, String username);
 
 	/**
-	 * Validates the refresh token against the given username.
+	 * @description Validates the refresh token against the given username.
 	 * @param token the refresh token
 	 * @param username the username to validate against
 	 * @return true if the refresh token is valid, false otherwise
@@ -64,7 +65,7 @@ public interface JwtUtil {
 	boolean validateRefreshToken(String token, String username);
 
 	/**
-	 * Extracts the role from the JWT token.
+	 * @description Extracts the role from the JWT token.
 	 * @param token the JWT token
 	 * @return the role extracted from the token
 	 */

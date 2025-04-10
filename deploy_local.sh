@@ -7,15 +7,16 @@ AUTH_SERVICE_NAMESPACE="auth-service-dev"
 AUTH_SERVICE_DOCKER_IMAGE_TAG="0.0.1"
 AUTH_SERVICE_DOCKER_IMAGE="auth-service-dev:$AUTH_SERVICE_DOCKER_IMAGE_TAG"
 
-# Load utility functions
-source ./scripts/local_util.sh
-
 # Load aws secrets environment variables
 assume_role() {
   local role_arn=$AWS_ROLE_ARN
   local session_name="auth-service-dev-session"
 
-  echo_header "Assuming role $role_arn..."
+  echo_header "Assuming role $role_arn"
+
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
 
   local assume_role_output
   assume_role_output=$(aws sts assume-role --role-arn "$role_arn" --role-session-name "$session_name")
@@ -37,7 +38,7 @@ set_aws_credentials() {
   local access_key_id
   local secret_access_key
 
-  echo_header "Setting AWS credentials..."
+  echo_header "Setting AWS credentials"
 
   access_key_id=$(echo "$assume_role_output" | jq -r '.Credentials.AccessKeyId')
   secret_access_key=$(echo "$assume_role_output" | jq -r '.Credentials.SecretAccessKey')
@@ -57,27 +58,27 @@ set_aws_credentials() {
 
 # Create kind cluster
 create_kind_cluster() {
-  echo_header "Creating kind cluster..."
+  echo_header "Creating kind cluster"
   kind create cluster --name $KIND_CLUSTER_NAME
 }
 
 # Build Docker image
 build_docker_image() {
-  echo_header "Building Docker image..."
+  echo_header "Building Docker image"
   docker build -t $AUTH_SERVICE_DOCKER_IMAGE .
   echo_footer "Docker image built successfully."
 }
 
 # Load Docker image into kind cluster
 load_docker_image() {
-  echo_header "Loading Docker image into kind cluster..."
+  echo_header "Loading Docker image into kind cluster"
   kind load docker-image $AUTH_SERVICE_DOCKER_IMAGE --name $KIND_CLUSTER_NAME
   echo_footer "Docker image loaded successfully."
 }
 
 # Create Kubernetes namespace
 create_namespace() {
-  echo_header "Creating namespace..."
+  echo_header "Creating namespace"
   kubectl create namespace "$AUTH_SERVICE_NAMESPACE"
   echo_footer "Namespace created successfully."
 }
@@ -86,7 +87,7 @@ create_namespace() {
 apply_k8s_configuration() {
   local deploymentName
 
-  echo_header "Applying Kubernetes configuration using Helm..."
+  echo_header "Applying Kubernetes configuration using Helm"
 
   deploymentName="$(yq r helm/values-dev.yaml 'deploymentName')"
   helm upgrade --install "$deploymentName" helm -f helm/values-dev.yaml --namespace "$AUTH_SERVICE_NAMESPACE" \
@@ -99,14 +100,14 @@ apply_k8s_configuration() {
 
 # Port forward to PostgreSQL service
 port_forward_postgres() {
-  echo_header "Port forwarding to PostgreSQL service..."
+  echo_header "Port forwarding to PostgreSQL service"
   kubectl port-forward svc/auth-service 5432:5432 -n "$AUTH_SERVICE_NAMESPACE" &
   echo_footer "Port forwarding set up successfully."
 }
 
 # Wait for deployment rollout
 wait_for_rollout() {
-  echo_header "Waiting for deployment rollout to complete..."
+  echo_header "Waiting for deployment rollout to complete"
   kubectl rollout status deployment/auth-service-dev -n "$AUTH_SERVICE_NAMESPACE"
 
   if [ $? -eq 0 ]; then
@@ -119,14 +120,14 @@ wait_for_rollout() {
 
 # Get the service URL
 get_service_url() {
-  echo_header "Getting the service URL..."
+  echo_header "Getting the service URL"
   SERVICE_URL=$(kubectl get svc auth-service -n "$AUTH_SERVICE_NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   echo_footer "Service is available at http://$SERVICE_URL:8080"
 }
 
 # Main script execution
 main() {
-  echo_app_title
+  echo_app_title "auth_service"
   assume_role
   create_kind_cluster
   build_docker_image

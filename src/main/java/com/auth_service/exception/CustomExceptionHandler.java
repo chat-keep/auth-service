@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class CustomExceptionHandler {
 
 	/**
-	 * Handles the AccessDeniedException.
+	 * @description Handles the AccessDeniedException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -33,7 +33,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the UserNotFoundException.
+	 * @description Handles the UserNotFoundException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -46,7 +46,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the PersonNotFoundException.
+	 * @description Handles the PersonNotFoundException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -59,7 +59,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the general exception.
+	 * @description Handles the general exception.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -72,7 +72,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the UniqueEmailException.
+	 * @description Handles the UniqueEmailException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -85,7 +85,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the UniqueUserNameException.
+	 * @description Handles the UniqueUserNameException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -98,7 +98,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the InvalidCredentialsException.
+	 * @description Handles the InvalidCredentialsException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -111,7 +111,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the UsernameNotFoundException.
+	 * @description Handles the UsernameNotFoundException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -124,7 +124,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the InvalidTokenException.
+	 * @description Handles the InvalidTokenException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -137,7 +137,7 @@ public class CustomExceptionHandler {
 	}
 
 	/**
-	 * Handles the ExpiredJwtException.
+	 * @description Handles the ExpiredJwtException.
 	 * @param ex the exception
 	 * @return a ResponseEntity containing an ApiResponse with the error message
 	 */
@@ -147,6 +147,32 @@ public class CustomExceptionHandler {
 		ApiResponse<Void> response = ApiResponseUtil.createErrorResponse(ErrorMessages.EXPIRED_JWT_TOKEN, null,
 				ErrorCode.ERR_EXPIRED_JWT.getCode());
 		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+	}
+
+	/**
+	 * @description Handles the InvalidAwsSecretValueException.
+	 * @param ex the exception
+	 * @return a ResponseEntity containing an ApiResponse with the error message
+	 */
+	@ExceptionHandler(InvalidAwsSecretValueException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ResponseEntity<ApiResponse<Void>> handleInvalidAwsSecretValueException(InvalidAwsSecretValueException ex) {
+		ApiResponse<Void> response = ApiResponseUtil.createErrorResponse(ErrorMessages.INVALID_AWS_SECRET_VALUE, null,
+				ErrorCode.ERR_INVALID_AWS_SECRET_VALUE.getCode());
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	/**
+	 * @description Handles the InvalidAwsSecretStringException.
+	 * @param ex the exception
+	 * @return a ResponseEntity containing an ApiResponse with the error message
+	 */
+	@ExceptionHandler(InvalidAwsSecretStringException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ResponseEntity<ApiResponse<Void>> handleInvalidAwsSecretStringException(InvalidAwsSecretStringException ex) {
+		ApiResponse<Void> response = ApiResponseUtil.createErrorResponse(ErrorMessages.INVALID_AWS_SECRET_STRING, null,
+				ErrorCode.ERR_INVALID_AWS_SECRET_STRING.getCode());
+		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }
