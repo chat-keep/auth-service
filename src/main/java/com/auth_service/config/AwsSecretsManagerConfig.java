@@ -1,5 +1,7 @@
 package com.auth_service.config;
 
+import com.auth_service.exception.InvalidAwsSecretStringException;
+import com.auth_service.exception.InvalidAwsSecretValueException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,28 +32,45 @@ public class AwsSecretsManagerConfig {
 	}
 
 	/**
-	 * Initializes the configuration by fetching the secret properties from AWS Secrets
-	 * Manager.
+	 * @description Initializes the configuration by fetching the secret properties from
+	 * AWS Secrets Manager.
 	 * @throws JsonProcessingException if an error occurs while processing JSON
 	 */
 	@PostConstruct
 	public void init() throws JsonProcessingException {
 		String secretString = fetchSecretString();
+
+		if (validateSecretString(secretString)) {
+			throw new InvalidAwsSecretStringException();
+		}
+
 		setSecretProperty(secretString, "authServiceJwtSecret", "JWT_SECRET");
+		setSecretProperty(secretString, "authServiceAccessTokenValidity", "AUTH_SERVICE_ACCESS_TOKEN_VALIDITY");
+		setSecretProperty(secretString, "authServiceRefreshTokenValidity", "AUTH_SERVICE_REFRESH_TOKEN_VALIDITY");
 	}
 
 	/**
-	 * Fetches the secret string from AWS Secrets Manager.
+	 * @description Validates the secret string.
+	 * @param secretString the secret string to validate
+	 * @return true if the secret string is valid, false otherwise
+	 */
+	private boolean validateSecretString(String secretString) {
+		return secretString == null || secretString.isEmpty();
+	}
+
+	/**
+	 * @description Fetches the secret string from AWS Secrets Manager.
 	 * @return the secret string
 	 */
 	private String fetchSecretString() {
 		GetSecretValueRequest request = createSecretValueRequest();
 		GetSecretValueResponse response = secretsManagerClient.getSecretValue(request);
+
 		return response.secretString();
 	}
 
 	/**
-	 * Creates a request to fetch the secret value from AWS Secrets Manager.
+	 * @description Creates a request to fetch the secret value from AWS Secrets Manager.
 	 * @return the GetSecretValueRequest
 	 */
 	private GetSecretValueRequest createSecretValueRequest() {
@@ -59,7 +78,16 @@ public class AwsSecretsManagerConfig {
 	}
 
 	/**
-	 * Sets the secret property in the system properties.
+	 * @description Validates the secret value.
+	 * @param secretValue the secret value to validate
+	 * @return true if the secret value is valid, false otherwise
+	 */
+	private boolean validateSecretValue(String secretValue) {
+		return secretValue != null && !secretValue.isEmpty();
+	}
+
+	/**
+	 * @description Sets the secret property in the system properties.
 	 * @param secretString the secret string
 	 * @param propertyName the property name to extract from the secret string
 	 * @param systemPropertyName the system property name to set
@@ -68,11 +96,16 @@ public class AwsSecretsManagerConfig {
 	private void setSecretProperty(String secretString, String propertyName, String systemPropertyName)
 			throws JsonProcessingException {
 		String secretValue = extractSecretValue(secretString, propertyName);
+
+		if (!validateSecretValue(secretValue)) {
+			throw new InvalidAwsSecretValueException();
+		}
+
 		System.setProperty(systemPropertyName, secretValue);
 	}
 
 	/**
-	 * Extracts the secret value from the secret string.
+	 * @description Extracts the secret value from the secret string.
 	 * @param secretString the secret string
 	 * @param propertyName the property name to extract
 	 * @return the extracted secret value
@@ -85,7 +118,7 @@ public class AwsSecretsManagerConfig {
 	}
 
 	/**
-	 * Builds the SecretsManagerClient based on the environment credentials.
+	 * @description Builds the SecretsManagerClient based on the environment credentials.
 	 * @return the SecretsManagerClient
 	 */
 	private SecretsManagerClient buildSecretsManagerClient() {
@@ -97,7 +130,7 @@ public class AwsSecretsManagerConfig {
 	}
 
 	/**
-	 * Checks if the environment credentials are available.
+	 * @description Checks if the environment credentials are available.
 	 * @return true if environment credentials are available, false otherwise
 	 */
 	private boolean areEnvironmentCredentialsAvailable() {
@@ -109,7 +142,7 @@ public class AwsSecretsManagerConfig {
 	}
 
 	/**
-	 * Creates a SecretsManagerClient with static credentials.
+	 * @description Creates a SecretsManagerClient with static credentials.
 	 * @return the SecretsManagerClient
 	 */
 	private SecretsManagerClient createClientWithStaticCredentials() {
@@ -120,7 +153,7 @@ public class AwsSecretsManagerConfig {
 	}
 
 	/**
-	 * Creates a SecretsManagerClient with web identity credentials.
+	 * @description Creates a SecretsManagerClient with web identity credentials.
 	 * @return the SecretsManagerClient
 	 */
 	private SecretsManagerClient createClientWithWebIdentityCredentials() {
