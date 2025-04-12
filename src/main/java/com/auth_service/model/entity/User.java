@@ -6,12 +6,18 @@ import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * User class. Represents a user.
  */
 @Entity(name = "user_info")
-public class User {
+public class User implements UserDetails {
 
 	@Id
 	@GeneratedValue
@@ -68,12 +74,12 @@ public class User {
 		this.userName = userName;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getPassword() {
+		return password;
 	}
 
 	public Person getPerson() {
@@ -98,6 +104,21 @@ public class User {
 
 	public void setRole(Role role) {
 		this.role = role;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+	}
+
+	@Override
+	public String getUsername() {
+		return userName;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return active;
 	}
 
 	@Override

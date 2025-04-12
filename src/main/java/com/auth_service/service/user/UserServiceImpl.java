@@ -129,8 +129,7 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			throw new UsernameNotFoundException(ErrorMessages.USERNAME_NOT_FOUND);
 		}
-		return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(),
-				new ArrayList<>());
+		return user;
 	}
 
 	/**
