@@ -7,10 +7,10 @@ import com.auth_service.model.constants.Role;
 import io.jsonwebtoken.*;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
+import io.jsonwebtoken.security.Keys;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.Key;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
@@ -104,15 +104,7 @@ public class JwtUtilImpl implements JwtUtil {
 	 * @return the claims extracted from the token
 	 */
 	private Claims extractAllClaims(String token) {
-		try {
-			return Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token).getBody();
-		}
-		catch (SignatureException e) {
-			throw new InvalidSignatureException();
-		}
-		catch (MalformedJwtException e) {
-			throw new InvalidJwtException();
-		}
+		return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).getBody();
 	}
 
 	/**
@@ -140,7 +132,16 @@ public class JwtUtilImpl implements JwtUtil {
 
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + validity))
-				.signWith(SignatureAlgorithm.HS512, JWT_SECRET).compact();
+				.signWith(getSignInKey(), SignatureAlgorithm.HS512).compact();
+	}
+
+	/**
+	 * @description Gets the signing key for the JWT token.
+	 * @return the signing key
+	 */
+	private Key getSignInKey() {
+		byte[] keyBytes = Base64.getDecoder().decode(JWT_SECRET);
+		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
 }

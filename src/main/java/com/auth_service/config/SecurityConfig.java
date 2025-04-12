@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,7 +36,7 @@ public class SecurityConfig {
 	private final JwtRequestFilter jwtRequestFilter;
 
 	/**
-	 * Constructor for SecurityConfig.
+	 * @description Constructor for SecurityConfig.
 	 * @param jwtRequestFilter the JwtRequestFilter object
 	 */
 	@Autowired
@@ -43,7 +45,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures the security filter chain for the application.
+	 * @description Configures the security filter chain for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @return a SecurityFilterChain object
 	 * @throws Exception if an error occurs while configuring the security filter chain
@@ -61,7 +63,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures CORS for the application.
+	 * @description Configures CORS for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @throws Exception if an error occurs while configuring the CORS
 	 */
@@ -70,7 +72,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures CSRF for the application.
+	 * @description Configures CSRF for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @throws Exception if an error occurs while configuring the CSRF
 	 */
@@ -79,7 +81,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures authorization for the application.
+	 * @description Configures authorization for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @throws Exception if an error occurs while configuring the authorization
 	 */
@@ -92,7 +94,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures session management for the application.
+	 * @description Configures session management for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @throws Exception if an error occurs while configuring the session management
 	 */
@@ -101,7 +103,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures filters for the application.
+	 * @description Configures filters for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @throws Exception if an error occurs while configuring the filters
 	 */
@@ -110,7 +112,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures exception handling for the application.
+	 * @description Configures exception handling for the application.
 	 * @param http the HttpSecurity object to configure
 	 * @throws Exception if an error occurs while configuring the exception handling
 	 */
@@ -119,7 +121,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Configures CORS for the application.
+	 * @description Configures CORS for the application.
 	 * @return a UrlBasedCorsConfigurationSource object
 	 */
 	@Bean
@@ -131,7 +133,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Builds a CORS configuration object.
+	 * @description Builds a CORS configuration object.
 	 * @return a CorsConfiguration object
 	 */
 	private CorsConfiguration buildCorsConfiguration() {
@@ -144,7 +146,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Creates a BCrypt password encoder.accessDeniedException
+	 * @description Creates a BCrypt password encoder.accessDeniedException
 	 * @return a BCryptPasswordEncoder object
 	 */
 	@Bean
@@ -153,7 +155,7 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * Creates an AccessDeniedHandler object.
+	 * @description Creates an AccessDeniedHandler object.
 	 * @return an AccessDeniedHandler object
 	 */
 	@Bean
@@ -162,6 +164,18 @@ public class SecurityConfig {
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			response.getWriter().write(ErrorMessages.ACCESS_DENIED);
 		};
+	}
+
+	/**
+	 * @description Creates an AuthenticationManager object.
+	 * @param authenticationConfiguration the AuthenticationConfiguration object
+	 * @return an AuthenticationManager object
+	 * @throws Exception if an error occurs while creating the AuthenticationManager
+	 */
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+			throws Exception {
+		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 }

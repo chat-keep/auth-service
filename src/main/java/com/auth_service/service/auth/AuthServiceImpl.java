@@ -5,7 +5,8 @@ import com.auth_service.exception.UserNotFoundException;
 import com.auth_service.model.entity.User;
 import com.auth_service.repository.UserRepository;
 import com.auth_service.common.util.jwt.JwtUtilImpl;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,17 +16,18 @@ public class AuthServiceImpl implements AuthService {
 
 	private final UserRepository userRepository;
 
-	private final BCryptPasswordEncoder passwordEncoder;
+	private final AuthenticationManager authenticationManager;
 
-	public AuthServiceImpl(JwtUtilImpl jwtUtil, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+	public AuthServiceImpl(JwtUtilImpl jwtUtil, UserRepository userRepository,
+			AuthenticationManager authenticationManager) {
 		this.jwtUtil = jwtUtil;
 		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
+		this.authenticationManager = authenticationManager;
 	}
 
 	public String authenticate(String identifier, String password) {
 		User user = findUserByIdentifier(identifier);
-		validatePassword(password, user.getPassword());
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(identifier, password));
 		return jwtUtil.generateToken(identifier, user.getRole());
 	}
 
@@ -54,17 +56,6 @@ public class AuthServiceImpl implements AuthService {
 			throw new UserNotFoundException();
 		}
 		return user;
-	}
-
-	/**
-	 * Validates the user's password.
-	 * @param rawPassword the raw password
-	 * @param encodedPassword the encoded password
-	 */
-	private void validatePassword(String rawPassword, String encodedPassword) {
-		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
-			throw new InvalidCredentialsException();
-		}
 	}
 
 }
