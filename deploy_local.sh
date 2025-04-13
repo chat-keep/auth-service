@@ -58,8 +58,13 @@ set_aws_credentials() {
 
 # Create kind cluster
 create_kind_cluster() {
-  echo_header "Creating kind cluster"
-  kind create cluster --name $KIND_CLUSTER_NAME
+  echo_header "Creating Kind cluster: $KIND_CLUSTER_NAME"
+  if ! kind get clusters | grep -q "$KIND_CLUSTER_NAME"; then
+    kind create cluster --name "$KIND_CLUSTER_NAME"
+    echo_footer "Kind cluster $KIND_CLUSTER_NAME created."
+  else
+    echo_footer "Kind cluster $KIND_CLUSTER_NAME already exists."
+  fi
 }
 
 # Build Docker image
